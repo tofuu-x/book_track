@@ -86,8 +86,54 @@
                 !username||
                 !password||
                 password.length<6||
-                username.includes('@')){
-                    errorMessage.innerText="❌ Invalid Credentials. Please try again."
+                !username.includes('@')){
+                    displayError("Invalid Credentials. Please try again")
+                    return
+                }
+            
+            isAuthenticating=true
+            authBtn.innerText='Authenticating...'   
+            try{
+                let data;
+                if(isRegis){
+                const res=await fetch('/auth/register',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({username,password})
+                    })
+                    const data=await res.json()
+                    
+                }else{
+                const res=await fetch('/auth/login',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({username:emailInput.value,password:passwordInput.value})
+                })
+                const data= await res.json()
+                console.log(data)   
+                }
+                if(!data.token){
+                    throw new Error('Authentication failed')
+                }
+                
+               
+            }catch(err){
+                displayError("Authentication failed")
+                
+            }finally{
+                isAuthenticating=false
+                authBtn.innerText=isRegis ? "Sign up" : "Log in"
+            }
+            
+    
+
+            
+            
+        }
+
+        // Displays errors and hides it after 3 seconds
+        function displayError(message){
+            errorMessage.innerText="❌ "+ message
                     errorMessage.style.display="block"
                     if(timeoutId){
                         clearTimeout(timeoutId)
@@ -96,42 +142,6 @@
                         errorMessage.innerText=""
                         errorMessage.style.display="none"
                     },3000)
-                    return
-                }
-            
-            isAuthenticating=true
-            regbtn.innerText='Authenticating...'   
-            try{
-                
-                console.log('HAHA')
-
-            }catch(err){
-                console.log(error)
-            }finally{
-                isAuthenticating=false
-                regbtn.innerText=isRegis ? "Sign up" : "Log in"
-            }
-            
-    
-
-            if(isRegis){
-                const res=await fetch('/auth/register',{
-                    method:'POST',
-                    headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({username,password})
-                    })
-                    const data=await res.json()
-                    
-            }else{
-                const res=await fetch('/auth/login',{
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({username:emailInput.value,password:passwordInput.value})
-                })
-                const data= await res.json()
-                
-            }
-            
         }
         
 

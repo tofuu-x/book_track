@@ -2,7 +2,7 @@ import express from 'express'
 import path,{dirname} from 'path'
 import { fileURLToPath } from 'url'
 import authRouter from './Routes/authRoute.js'
-
+import db from './db.js';
 
 const app=express()
 const PORT=5003||process.env.PORT
