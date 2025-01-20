@@ -12,6 +12,7 @@
   "type": "module",
   "description": "An App that tracks books that are in your list and the books that you have already read. Made with express js and SQLITE database. Has Authentication and JWT",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.8.1",
     "express": "^4.21.2",
     "path": "^0.12.7",

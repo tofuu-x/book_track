@@ -58,6 +58,10 @@
         let timeoutId;
 
         //Elements
+        const header=document.querySelector('header')
+        const nav=document.querySelector('nav')
+        const main=document.querySelector('header')
+        const hr=document.querySelector('hr')
         const authBtn=document.getElementById('authBtn')
         const regBtn=document.getElementById('regBtn')
         const emailInput=document.getElementById('emailInput')
@@ -71,6 +75,14 @@
             document.querySelector(".register-container > h3").innerText=isRegis ? "Have an Account?" : "Don't have an Account?";
             document.querySelector(".login-container > h3").innerText=isRegis ? "Create your new Account" : "Login to your Account"
             authBtn.innerText=isRegis ? "Sign up" : "Log in"
+        }
+
+        function showDashboard(){
+            header.style.display='block';
+            nav.style.display="block";
+            hr.style.display="block";
+            main.style.display="block";
+            document.querySelector('.authenticate-container').style.display="none";
         }
 
         //Authentication
@@ -101,23 +113,25 @@
                     headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({username,password})
                     })
-                    const data=await res.json()
+                    data=await res.json()
                     
                 }else{
-                const res=await fetch('/auth/login',{
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({username:emailInput.value,password:passwordInput.value})
-                })
-                const data= await res.json()
-                console.log(data)   
+                    const res=await fetch('/auth/login',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({username:emailInput.value,password:passwordInput.value})
+                    })
+                    data= await res.json()
                 }
+                console.log(data.token)
                 if(!data.token){
                     throw new Error('Authentication failed')
                 }
+                showDashboard()
                 
                
             }catch(err){
+                console.log(err)
                 displayError("Authentication failed")
                 
             }finally{
