@@ -31,7 +31,7 @@
         <button><h4>To be Read</h4></button>
         <button><h4>Completed</h4></button>
     </nav>
-    <hr style="display:none;">
+    <hr id='hr2' style="display:none;">
     <main style="display:none;">
         <div class="book-container">
             <h5 class="book-name">A Little Life</h6>
@@ -60,7 +60,7 @@
         //Elements
         const header=document.querySelector('header')
         const nav=document.querySelector('nav')
-        const main=document.querySelector('header')
+        const main=document.querySelector('main')
         const hr=document.querySelector('hr')
         const authBtn=document.getElementById('authBtn')
         const regBtn=document.getElementById('regBtn')
@@ -96,24 +96,34 @@
                 username===""||
                 password===""||
                 !username||
-                !password||
-                password.length<6||
-                !username.includes('@')){
+                !password){
                     displayError("Invalid Credentials. Please try again")
                     return
                 }
+            if(isRegis && !username.includes('@')){
+                displayError('Enter a valid email!')
+                return
+            }
+
+            if (isRegis && password.length<6){
+                displayError("Password should be more than 6 characters");
+                return;
+            }
             
             isAuthenticating=true
             authBtn.innerText='Authenticating...'   
             try{
                 let data;
                 if(isRegis){
-                const res=await fetch('/auth/register',{
-                    method:'POST',
-                    headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({username,password})
-                    })
-                    data=await res.json()
+                    const res=await fetch('/auth/register',{
+                        method:'POST',
+                        headers:{'Content-Type':'application/json'},
+                        body:JSON.stringify({username,password})
+                        })
+                    if(res.ok){
+                        data=await res.json()
+                    }
+                    
                     
                 }else{
                     const res=await fetch('/auth/login',{
@@ -121,13 +131,18 @@
                     headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({username:emailInput.value,password:passwordInput.value})
                     })
-                    data= await res.json()
+                    if(!res.ok){
+                        throw new Error("Authentication Failed")
+                    }
+                    data=await res.json()
                 }
-                console.log(data.token)
-                if(!data.token){
-                    throw new Error('Authentication failed')
+                if(data.error){
+                    displayError(data.error)
+                    return;
                 }
-                showDashboard()
+                if(data.token){
+                    showDashboard()
+                }
                 
                
             }catch(err){
