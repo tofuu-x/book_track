@@ -23,9 +23,9 @@ router.post('/register',(req,res)=>{
     const registerStatement=db.prepare(`INSERT INTO users(username,password) VALUES (?,?)`)
     const insertedUser=registerStatement.run(username,hashedPassword);
     const token=jwt.sign({id:insertedUser.lastInsertRowid},process.env.JWT_SECRET_KEY,{expiresIn:'1d'})
-    console.log(token)
-    res.json({token:'successful'})
+    res.json({token})
   }catch(error){
+    res.status(500)
     console.log(error);
   }
   
@@ -33,7 +33,30 @@ router.post('/register',(req,res)=>{
 
 router.post('/login',(req,res)=>{
   const {username,password}=req.body
-  res.json('OKsdfsd')
+  
+  try{
+    const lookupStatement=db.prepare(`SELECT * FROM users WHERE username=(?)`);
+    const user=lookupStatement.get(username);
+
+    if(!user){
+      res.json({error:"User doesn't exist!"})
+      return;
+    }
+    
+    const isPasswordValid=bcrypt.compareSync(password,user.password)
+
+    if(!isPasswordValid){
+      res.status(401).json({error:"Invalid Credentials"})
+      return
+    }
+    const token=jwt.sign({id:user.id},process.env.JWT_SECRET_KEY,{expiresIn:'1d'})
+    res.json({token});
+
+  }catch(error){
+    console.log(error)
+    res.status(500)
+  }
+  
 })
 
 
