@@ -2,7 +2,9 @@ import express from 'express'
 import path,{dirname} from 'path'
 import { fileURLToPath } from 'url'
 import authRouter from './Routes/authRoute.js'
+import bookRouter from './Routes/bookRoute.js'
 import db from './db.js';
+import authMiddleware from './Middleware/AuthMiddleware.js'
 
 const app=express()
 const PORT=5003||process.env.PORT
@@ -27,7 +29,7 @@ const __dirname=dirname(filePath)
 
 //! Routes end
 
-
+app.use('/book',authMiddleware,bookRouter)
 app.use('/auth',authRouter)
 
 

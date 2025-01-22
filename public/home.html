@@ -33,25 +33,16 @@
     </nav>
     <hr id='hr2' style="display:none;">
     <main style="display:none;">
-        <div class="book-container">
-            <h5 class="book-name">A Little Life</h6>
-            <div class="button-grouping">
-                <button class="completed-btn"><h6>Completed</h6></button>
-                <button class="delete-btn"><h6>Delete</h6></button>
-            </div>
-        </div>
-        <div class="book-container">
-            <h5 class="book-name">A Little Life</h6>
-            <div class="button-grouping">
-                <button class="completed-btn"><h6>Completed</h6></button>
-                <button class="delete-btn"><h6>Delete</h6></button>
-            </div>
-        </div>
     </main>
+    
     
     
 
     <script>
+        
+        let token=localStorage.getItem('token')
+        
+        
         let isAuthenticating=false
         let isRegis=false
         let isLoading=false
@@ -61,12 +52,12 @@
         const header=document.querySelector('header')
         const nav=document.querySelector('nav')
         const main=document.querySelector('main')
-        const hr=document.querySelector('hr')
         const authBtn=document.getElementById('authBtn')
         const regBtn=document.getElementById('regBtn')
         const emailInput=document.getElementById('emailInput')
         const passwordInput=document.getElementById('passwordInput')
         const errorMessage=document.getElementById('error-message')
+        
 
         //Functions
         function toggleRegistration(){
@@ -80,7 +71,6 @@
         function showDashboard(){
             header.style.display='block';
             nav.style.display="block";
-            hr.style.display="block";
             main.style.display="block";
             document.querySelector('.authenticate-container').style.display="none";
         }
@@ -120,9 +110,9 @@
                         headers:{'Content-Type':'application/json'},
                         body:JSON.stringify({username,password})
                         })
-                    if(res.ok){
-                        data=await res.json()
-                    }
+                    
+                    data=await res.json()
+                    
                     
                     
                 }else{
@@ -131,9 +121,7 @@
                     headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({username:emailInput.value,password:passwordInput.value})
                     })
-                    if(!res.ok){
-                        throw new Error("Authentication Failed")
-                    }
+                    
                     data=await res.json()
                 }
                 if(data.error){
@@ -141,6 +129,9 @@
                     return;
                 }
                 if(data.token){
+                    localStorage.setItem('token',data.token)
+                    token=data.token
+                    getBookData()
                     showDashboard()
                 }
                 
@@ -152,13 +143,50 @@
             }finally{
                 isAuthenticating=false
                 authBtn.innerText=isRegis ? "Sign up" : "Log in"
+            }     
+        }
+
+        //Get User Book Data
+        async function getBookData(){
+            booklist=""
+            const res=await fetch('/book',{
+                method:'GET',
+                headers:{'Content-Type':'application/json',
+                         'Authorization':token},
+            })
+            const data=await res.json();
+            if (!data.length){
+                booklist=`<div id="empty-list-message"><h3>No books yet!</h3>
+                        <h4>Add your first book</h4></div>`
+            }else{
+                data.forEach((book,bookIndex)=>{
+                booklist+=`
+                <div class="book-container">
+                    <h5 class="book-name">${book.book_name}</h6>
+                    <div class="button-grouping">
+                        <button class="completed-btn"><h6>Completed</h6></button>
+                        <button class="delete-btn"><h6>Delete</h6></button>
+                    </div>
+                </div>`
+                })
             }
             
-    
 
+            booklist+=
+            `
+            <div class="input-container">
+                <input id="bookInput" placeholder="Add Book" />
+                <button onClick="addBook()">
+                    Add
+                </button>
+            </div>
             
+            `
+
+            main.innerHTML=booklist
             
         }
+
 
         // Displays errors and hides it after 3 seconds
         function displayError(message){
@@ -173,7 +201,26 @@
                     },3000)
         }
         
+        async function addBook(){
+            const insertBookField=document.querySelector('#bookInput')
+            const book=insertBookField.value
+            const res= await fetch(('/book'),{
+                method:'POST',
+                headers:{'Content-Type':'application/json',
+                    'Authorization':token
+                },
+                body:JSON.stringify({book_name:book})
+            })
+            const data=await res.json()
+            await getBookData()
+        }
 
+
+        if(token){
+            getBookData();
+            showDashboard();
+
+        }
         
 
     </script>
