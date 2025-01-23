@@ -164,7 +164,7 @@
                 <div class="book-container">
                     <h5 class="book-name">${book.book_name}</h6>
                     <div class="button-grouping">
-                        <button class="completed-btn"><h6>Completed</h6></button>
+                        <button class="completed-btn" onclick="completedBook(${book.id})"><h6>Completed</h6></button>
                         <button class="delete-btn" onclick="deleteBook(${book.id})"><h6>Delete</h6></button>
                     </div>
                 </div>`
@@ -220,7 +220,18 @@
                 method:'DELETE',
                 headers:{'Authorization':token}
             })
+           
+            
             await getBookData();
+        }
+
+        async function completedBook(id){
+            await fetch(`book/${id}`,{
+                method:'PUT',
+                headers:{'Authorization':token}
+            })
+
+            await getBookData()
         }
 
 

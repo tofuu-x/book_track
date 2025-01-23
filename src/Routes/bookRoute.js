@@ -16,7 +16,7 @@ router.get('/',(req,res)=>{
 
 router.post('/',(req,res)=>{
   const {book_name}=req.body
-  console.log(book_name)
+  
   try{
     const insertStatement=db.prepare(`INSERT INTO books (book_name,user_id) VALUES (?,?)`)
     insertStatement.run(book_name,req.id)
@@ -29,10 +29,13 @@ router.post('/',(req,res)=>{
 
 router.delete('/:id',(req,res)=>{
   const {id}=req.params
-  console.log(id)
+  
   try{
-    const deleteStatement=db.prepare(`DELETE FROM books WHERE id=(?)`)
-    deleteStatement.run(id)
+    const deleteStatement=db.prepare(`DELETE FROM books WHERE id=(?) AND user_id=(?)`)
+    const result=deleteStatement.run(id,req.id)
+    if(result.changes===0){
+      return res.status(400).json({'Error':'Invalid Request'})
+    }
     res.status(200).send()
   }catch(error){
     console.log(error)
@@ -40,6 +43,20 @@ router.delete('/:id',(req,res)=>{
   }
   
 
+})
+
+router.put('/:id',(req,res)=>{
+  const {id}=req.params
+  try{
+    const updateStatement=db.prepare(`UPDATE books SET completed=1 WHERE id=(?) AND user_id=(?)`)
+    const result=updateStatement.run(id,req.id)
+    if(result.changes===0){
+      return res.status(400).json({'Error':'Invalid Request'})
+    }
+  }catch(error){
+    console.log(error)
+    res.status(400).send()
+  }
 })
 
 
