@@ -19,12 +19,27 @@ router.post('/',(req,res)=>{
   console.log(book_name)
   try{
     const insertStatement=db.prepare(`INSERT INTO books (book_name,user_id) VALUES (?,?)`)
-    const book=insertStatement.run(book_name,req.id)
-    console.log(book)
+    insertStatement.run(book_name,req.id)
+    
     res.json({message:'successful'})
   }catch(error){
     console.log(error)
   }
+})
+
+router.delete('/:id',(req,res)=>{
+  const {id}=req.params
+  console.log(id)
+  try{
+    const deleteStatement=db.prepare(`DELETE FROM books WHERE id=(?)`)
+    deleteStatement.run(id)
+    res.status(200).send()
+  }catch(error){
+    console.log(error)
+    res.status(500).send()
+  }
+  
+
 })
 
 

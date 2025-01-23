@@ -159,13 +159,13 @@
                 booklist=`<div id="empty-list-message"><h3>No books yet!</h3>
                         <h4>Add your first book</h4></div>`
             }else{
-                data.forEach((book,bookIndex)=>{
+                data.forEach((book)=>{
                 booklist+=`
                 <div class="book-container">
                     <h5 class="book-name">${book.book_name}</h6>
                     <div class="button-grouping">
                         <button class="completed-btn"><h6>Completed</h6></button>
-                        <button class="delete-btn"><h6>Delete</h6></button>
+                        <button class="delete-btn" onclick="deleteBook(${book.id})"><h6>Delete</h6></button>
                     </div>
                 </div>`
                 })
@@ -213,6 +213,14 @@
             })
             const data=await res.json()
             await getBookData()
+        }
+
+        async function deleteBook(id){
+            await fetch((`/book/${id}`),{
+                method:'DELETE',
+                headers:{'Authorization':token}
+            })
+            await getBookData();
         }
 
 
