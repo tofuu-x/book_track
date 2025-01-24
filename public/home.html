@@ -24,12 +24,12 @@
     </div>
     <header style="display:none;">
         <h2 class="text-gradient">Track your Books!</h2>
-        <h3>You have read 0 books </h3>
+        <h3>You have read <span id="count">0</span> books </h3>
     </header>
     <nav style="display:none;">
-        <button><h4>All</h4></button>
-        <button><h4>To be Read</h4></button>
-        <button><h4>Completed</h4></button>
+        <button onclick="changeTab('All')" class="selected"><h4>All</h4></button>
+        <button onclick="changeTab('To be Read')"><h4>To be Read</h4></button>
+        <button onclick="changeTab('Completed')"><h4>Completed</h4></button>
     </nav>
     <hr id='hr2' style="display:none;">
     <main style="display:none;">
@@ -47,6 +47,8 @@
         let isRegis=false
         let isLoading=false
         let timeoutId;
+        let data=[];
+        let selectedTab='All'
 
         //Elements
         const header=document.querySelector('header')
@@ -57,6 +59,8 @@
         const emailInput=document.getElementById('emailInput')
         const passwordInput=document.getElementById('passwordInput')
         const errorMessage=document.getElementById('error-message')
+        const navElements=document.querySelectorAll('nav button')
+        const readCount=document.querySelector('#count')
         
 
         //Functions
@@ -73,6 +77,10 @@
             nav.style.display="block";
             main.style.display="block";
             document.querySelector('.authenticate-container').style.display="none";
+        }
+
+        function updateHeader(){
+            readCount.innerText=data.filter(book=>book.completed).length
         }
 
         //Authentication
@@ -148,23 +156,32 @@
 
         //Get User Book Data
         async function getBookData(){
-            booklist=""
+            
             const res=await fetch('/book',{
                 method:'GET',
                 headers:{'Content-Type':'application/json',
                          'Authorization':token},
             })
-            const data=await res.json();
+            data=await res.json();
+            
+            renderTodo()
+        }
+
+        function renderTodo(){
+            updateHeader();
+            booklist=""
             if (!data.length){
                 booklist=`<div id="empty-list-message"><h3>No books yet!</h3>
                         <h4>Add your first book</h4></div>`
             }else{
-                data.forEach((book)=>{
+                data.filter(val=>{
+                    return selectedTab==="All" ? true : selectedTab==='Completed' ? val.completed : !val.completed
+                }).forEach((book)=>{
                 booklist+=`
                 <div class="book-container">
                     <h5 class="book-name">${book.book_name}</h6>
                     <div class="button-grouping">
-                        <button class="completed-btn" onclick="completedBook(${book.id})"><h6>Completed</h6></button>
+                        <button class="completed-btn" onclick="completedBook(${book.id})" ${book.completed ? 'disabled' :'' }><h6>Completed</h6></button>
                         <button class="delete-btn" onclick="deleteBook(${book.id})"><h6>Delete</h6></button>
                     </div>
                 </div>`
@@ -186,6 +203,7 @@
             main.innerHTML=booklist
             
         }
+        
 
 
         // Displays errors and hides it after 3 seconds
@@ -230,14 +248,29 @@
                 method:'PUT',
                 headers:{'Authorization':token}
             })
-
             await getBookData()
+        }
+
+        function changeTab(tab){
+            selectedTab=tab
+            navElements.forEach(element=>{
+                if(element.innerText.includes(selectedTab)){
+                    element.classList.add('selected')
+                }else{
+                    element.classList.remove('selected')
+                }
+            })
+            renderTodo()
         }
 
 
         if(token){
-            getBookData();
-            showDashboard();
+            async function run(){
+                await getBookData();
+                showDashboard();
+            }
+            run()
+            
 
         }
         

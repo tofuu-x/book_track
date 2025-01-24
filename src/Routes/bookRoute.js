@@ -53,6 +53,7 @@ router.put('/:id',(req,res)=>{
     if(result.changes===0){
       return res.status(400).json({'Error':'Invalid Request'})
     }
+    res.status(200).send()
   }catch(error){
     console.log(error)
     res.status(400).send()

@@ -65,9 +65,12 @@ nav{
     display:flex;
     justify-content: center;
     align-items: center;
-    max-width:600px;
-    gap:1rem;
+    max-width:800px;
     padding:1rem 0rem;
+    min-height:100px;
+}
+nav button{
+    margin-right:2px;
 }
 
 
@@ -122,14 +125,19 @@ main{
     align-items: center;
 }
 
+.selected{
+    box-shadow: 0 0 0 0 #bed1e7;
+    transform: translate(2px, 2px);
+    border:solid white 2px;
+}
 
 
-/* @media (prefers-color-scheme:dark){
-    .authenticate-container{
-        box-shadow:3px 3px 3px 1px rgb(46, 42, 42);
-    
+
+@media (prefers-color-scheme:light){
+    .selected{
+        border-color:black;
     }
-} */
+}
 
 @media(min-width:670px){
     *{
