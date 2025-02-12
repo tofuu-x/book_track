@@ -26,7 +26,7 @@ router.post('/register',(req,res)=>{
     res.json({token})
   }catch(error){
     res.status(500)
-    
+    console.log(error);
   }
   
 })
