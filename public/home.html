@@ -80,6 +80,7 @@
         }
 
         function updateHeader(){
+            
             readCount.innerText=data.filter(book=>book.completed).length
         }
 
@@ -162,9 +163,25 @@
                 headers:{'Content-Type':'application/json',
                          'Authorization':token},
             })
-            data=await res.json();
-            
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                if (res.status === 401) { 
+                    alert(errorData.message); 
+                    localStorage.removeItem('token'); 
+                    token = null;
+                    document.querySelector('.authenticate-container').style.display = "block";
+                    header.style.display = "none";
+                    nav.style.display = "none";
+                    main.style.display = "none";
+                    return;
+            }
+            throw new Error(errorData.message || "Failed to fetch books");
+            }
+
+            data=await res.json();     
             renderTodo()
+
         }
 
         function renderTodo(){

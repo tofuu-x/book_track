@@ -9,12 +9,14 @@ function authMiddleware(req, res, next) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     req.id = decoded['id'];
+    next();
   } catch (error) {
-    console.log(error);
-    return res.redirect('/');
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Session expired. Please log in again." });
+    }
   }
 
-  next();
+  
 }
 
 export default authMiddleware;
